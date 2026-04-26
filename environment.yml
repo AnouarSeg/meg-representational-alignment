@@ -1,0 +1,51 @@
+# Conda environment for the THINGS-MEG representational-alignment project.
+#
+#   conda env create -f environment.yml
+#   conda activate things-meg
+#   pip install -e .            # installs the local `thingsmeg` package (editable)
+#
+# Notes
+# -----
+# * mne-python is the backbone (MEG preprocessing/analysis) and is pinned loosely
+#   so we get a recent, well-tested release.
+# * brainiak (shared response modelling) can be fragile to install because it
+#   builds against an MPI implementation. It is therefore listed under pip and
+#   kept optional — if it fails, the SRM analysis can fall back to a small
+#   in-repo implementation (see src/thingsmeg/alignment.py). Do not let a
+#   brainiak build failure block the rest of the environment.
+name: things-meg
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy
+  - scipy
+  - pandas
+  - scikit-learn
+  - matplotlib
+  - seaborn
+  - h5py
+  - tqdm
+  - pyyaml
+  - jupyterlab
+  - ipykernel
+  # MEG / neuroimaging
+  - mne
+  - nilearn
+  # vision-model embeddings (brain-to-model alignment, Week 6)
+  - pytorch
+  - torchvision
+  # dev tooling
+  - ruff
+  - pytest
+  - openmpi        # provides MPI for a brainiak build attempt
+  - mpi4py
+  - pip
+  - pip:
+      - openneuro-py        # download from OpenNeuro
+      - awscli              # s3 sync fallback for large/flaky downloads
+      - rsatoolbox          # Kriegeskorte-group RSA (cross-validated RDMs)
+      - himalaya            # fast cross-validated ridge (brain encoding)
+      # netrep (Williams shape metrics) is abandoned — implemented directly in src/thingsmeg/alignment.py
+      - open_clip_torch     # CLIP embeddings for THINGS stimuli
+      - brainiak            # shared response modelling (optional; may fail to build)

@@ -1,0 +1,56 @@
+# Central configuration for the THINGS-MEG alignment project.
+# Edited by hand; loaded via thingsmeg.config.load_config().
+
+dataset:
+  # THINGS-MEG on OpenNeuro. Accession VERIFIED (openneuro.org/datasets/ds004212):
+  # 4 participants, 272 MEG channels (CTF system -> expect .ds recordings),
+  # ~377 GB total (~94 GB/subject) -> download one subject at a time.
+  openneuro_id: "ds004212"
+  name: "THINGS-MEG"
+  subjects: ["BIGMEG1", "BIGMEG2", "BIGMEG3", "BIGMEG4"]  # confirm exact labels from participants.tsv during inspection
+  n_subjects_expected: 4
+
+paths:
+  raw: "/Volumes/MEG/things-meg/raw"   # USB drive (466 GB); mounted at /Volumes/MEG
+  derivatives: "data/derivatives"      # our preprocessed outputs (epochs, RDMs, etc.)
+  results: "results"
+  figures: "figures"
+
+preprocessing:
+  l_freq: 0.1          # high-pass (Hz)
+  h_freq: 40.0         # low-pass (Hz)
+  notch: null          # set to line freq (e.g. 50 or 60) if needed; confirm from PSD
+  resample_sfreq: 200  # Hz, post-epoching downsample for tractable RSA/decoding
+  tmin: -0.1           # epoch start relative to stimulus onset (s)
+  tmax: 0.8            # epoch end (s)
+  baseline: [-0.1, 0.0]
+  ica:
+    n_components: 0.99     # explained-variance fraction
+    method: "infomax"      # extended infomax is the MNE default for EOG/ECG
+    reject_by: ["eog", "ecg"]  # automatic artifact-component detection
+
+decoding:
+  estimator: "ridge"      # time-resolved linear decoders
+  cv_folds: 5
+  scoring: "accuracy"     # multiclass category decoding; revisit vs. AUC
+
+rsa:
+  rdm_metric: "crossnobis"   # cross-validated Mahalanobis (Walther et al. 2016)
+  time_window_ms: 20         # sliding-window width for time-resolved RDMs
+  time_step_ms: 10
+
+alignment:
+  methods: ["hyperalignment", "srm", "cca", "procrustes", "shape_metric"]
+  n_components: 50           # shared-latent dimensionality (tune w/ noise ceiling)
+
+models:
+  # Vision foundation models for brain-to-model alignment (Week 6).
+  clip: "ViT-B-32"
+  clip_pretrained: "openai"
+  dinov2: "dinov2_vitb14"
+
+stats:
+  n_permutations: 1000
+  cluster_alpha: 0.05
+  n_bootstrap: 1000
+  random_seed: 20260621

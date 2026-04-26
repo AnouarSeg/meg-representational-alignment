@@ -1,0 +1,44 @@
+# --- Private / strategy notes ---
+PROJECT_CONTEXT.md
+notes_private.md
+Guide_manual_check.md
+
+# --- Data (large; never committed) ---
+data/raw/
+data/derivatives/
+*.fif
+*.fif.gz
+*.ds/
+*.con
+*.sqd
+*.h5
+*.hdf5
+*.npy
+*.npz
+
+# --- Results / figures ---
+# Large .npz result files excluded (regenerable from scripts).
+# Figures (PNGs) committed for immediate visibility on GitHub.
+results/*
+!results/.gitkeep
+figures/*.png
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# --- Env / editor / OS ---
+.env
+.venv/
+.DS_Store
+.idea/
+.vscode/
+*.code-workspace

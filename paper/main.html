@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>main</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="temporal-dynamics-of-cross-subject-representational-alignment-in-human-meg">Temporal
+dynamics of cross-subject representational alignment in human MEG</h1>
+<p><strong>Anouar Seghir</strong><br />
+Independent research project, 2026</p>
+<hr />
+<h2 id="abstract">Abstract</h2>
+<p>Does the complexity of the transform needed to align visual
+representations across individuals increase with post-stimulus time,
+mirroring a cortical processing hierarchy? We address this question
+using magnetoencephalography (MEG) recordings of four subjects viewing
+1,854 object images (THINGS-MEG; Gifford et al. 2022). We compute
+time-resolved representational dissimilarity matrices (RDMs) using
+cross-validated Mahalanobis distance (crossnobis; Walther et al. 2016),
+and compare Procrustes (orthogonal) versus unconstrained ridge
+regression alignment between pairs of subjects as a function of
+post-stimulus latency. We further relate brain RDMs to human similarity
+judgements (SPOSE; Muttenthaler et al. 2023) and CLIP text embeddings.
+Object-category information was decodable above chance from ~50 ms
+onward (peak 1.75% vs. 1% chance at 530 ms, 4-subject mean).
+Cross-subject transfer accuracy peaked at 7.5% at 335 ms using
+Procrustes alignment (chance: 1%). The gain of unconstrained ridge over
+Procrustes—our measure of alignment complexity—was near zero throughout
+the epoch (post-stimulus mean: −0.001 ± 0.011), failing to support the
+early-simple/late-complex hierarchy hypothesis in this dataset. Brain
+RDMs (published THINGS-MEG decoding RDMs; 200 categories) correlated
+positively with SPOSE human similarity judgements (peak r = 0.058 at 400
+ms) and with CLIP text embeddings (peak r = 0.060 at 30 ms), while
+remaining substantially below the inter-subject noise ceiling (upper
+bound r = 0.545), indicating that the brain signal captured here
+reflects only a fraction of the shared representational geometry
+accessible in principle. We discuss methodological constraints—in
+particular the low trial count per condition (12 trials/category) and
+limited subject pool (n = 4)—and identify the experimental changes
+needed to detect the hypothesised hierarchy.</p>
+<hr />
+<h2 id="introduction">Introduction</h2>
+<p>A central question in systems neuroscience is whether visual
+processing is organised hierarchically: early cortical areas encoding
+low-level sensory features, later areas encoding high-level semantic
+structure. Representational similarity analysis (RSA; Kriegeskorte et
+al. 2008) provides a subject-agnostic lens on this question by comparing
+the geometry of neural representations across individuals and
+computational models without assuming a shared sensor space.</p>
+<p>Cross-subject <em>alignment</em> methods (hyperalignment, SRM,
+Procrustes) recover a common representational geometry from
+idiosyncratic sensor configurations. A testable prediction of the
+processing hierarchy is that early representations align via simple
+(near-orthogonal) transforms—because the dominant structure is sensory
+and largely shared—while late representations require more flexible
+mappings to capture idiosyncratic semantic organisation. We
+operationalise “complexity” as the incremental transfer accuracy of an
+unconstrained linear map over Procrustes, evaluated in held-out
+conditions via 5-fold cross-validation.</p>
+<p>We additionally ask whether the temporal profile of brain-to-model
+alignment mirrors the cross-subject hierarchy, using human-rated object
+similarity (SPOSE) as a semantic model and CLIP ViT-B/32 text embeddings
+as a low-cost vision-language proxy.</p>
+<hr />
+<h2 id="methods">Methods</h2>
+<p><strong>Dataset.</strong> THINGS-MEG (OpenNeuro ds004212; Gifford et
+al. 2022): 4 subjects, 272-channel CTF MEG, 12 sessions × 10 runs per
+subject, ~1,854 object categories × 12 trials/category. Data were
+bandpass-filtered (0.1–40 Hz), ICA-cleaned (infomax, one set of
+components per session), epoched −100 to 800 ms relative to stimulus
+onset, baseline-corrected, and resampled to 200 Hz. ICA components were
+manually verified for all 4 subjects (BIGMEG1: 4 components excluded — 1
+eye movement, 3 cardiac; BIGMEG2: 3 — 2 eye, 1 cardiac; BIGMEG3: 3 — 2
+cardiac, 1 slow drift; BIGMEG4: 2 — cardiac).</p>
+<p><strong>Decoding.</strong> Time-resolved ridge classification
+(StandardScaler + RidgeClassifier, α = 1.0) with 5-fold stratified
+cross-validation on the 100 most-sampled categories (1,200 trials),
+using MNE-Python’s SlidingEstimator.</p>
+<p><strong>RSA.</strong> Cross-validated Mahalanobis (crossnobis) RDMs
+across all 1,854 categories per timepoint (2-fold cross-validation,
+float32). For brain-to-model comparison, we used the published
+THINGS-MEG pairwise decoding RDMs (Gifford et al. 2022; 200 held-out
+test categories, 4 subjects × 281 timepoints) rather than our own
+single-subject crossnobis RDMs, giving cleaner estimates with
+substantially more trials per condition. Brain-model RSA computed as
+Spearman r between RDM upper triangles, averaged across subjects.</p>
+<p><strong>Alignment.</strong> Per-category condition means (100 × 272
+at each timepoint) z-scored across categories. Procrustes (orthogonal)
+and ridge (α = 1.0) maps fitted on 80 training conditions, evaluated on
+20 held-out conditions via 5-fold CV. Complexity = ridge transfer
+accuracy − Procrustes transfer accuracy. Williams shape distance
+(Williams et al. 2021) computed directly without the netrep package.</p>
+<p><strong>Models.</strong> SPOSE: 1854×1854 human similarity matrix
+(Muttenthaler et al. 2023), subset to 200 test categories, converted to
+dissimilarity. CLIP-text: ViT-B/32 text encoder embeddings of category
+names (open_clip), cosine dissimilarity.</p>
+<p><strong>Statistics.</strong> Cluster-based permutation test (MNE,
+1,000 permutations) for decoding; bootstrap CIs (1,000 resamples over
+subjects/pairs) for all curves; shuffle null (1,000 permutations of
+model RDM labels) for brain-model RSA. Noise ceiling: Nili et al. (2014)
+leave-one-subject-out estimator.</p>
+<hr />
+<h2 id="results">Results</h2>
+<p><strong>Object-category decoding.</strong> Mean decoding accuracy
+exceeded chance (1%) from approximately 50 ms post-stimulus, reaching a
+peak of 1.75% at 530 ms (Figure 1). Pre-stimulus baseline was 0.94%
+(near chance), confirming no temporal leakage. No time cluster survived
+cluster-based permutation testing at α = 0.05, reflecting low
+statistical power with n = 4 subjects.</p>
+<p><strong>Cross-subject representational geometry.</strong> Crossnobis
+RDMs showed positive mean dissimilarity from ~100 ms onward in BIGMEG2,
+with weaker and noisier signals in the remaining subjects—a pattern
+consistent with the known inter-subject variability of MEG sensor
+topographies. Williams shape distance between subject pairs was stable
+across the epoch (Figure 2), indicating that the overall geometry of
+representational similarity did not change dramatically in structure
+over time.</p>
+<p><strong>Alignment complexity over time.</strong> Procrustes transfer
+accuracy peaked at 7.5% (chance: 1%) and ridge at 7.8%, with a mean
+complexity score (ridge gain) of −0.001 ± 0.011 post-stimulus—not
+significantly different from zero and not increasing over time (Figure
+3). The predicted early-simple/late-complex gradient was not observed. A
+notable inter-subject finding emerged: the effective rank of the
+crossnobis RDMs differed dramatically across subjects (BIGMEG1: ~16,
+BIGMEG2: ~16, BIGMEG3: ~3, BIGMEG4: ~5), indicating highly heterogeneous
+representational dimensionality across individuals. This heterogeneity
+itself may suppress the alignment signal by mixing high- and
+low-dimensional geometries.</p>
+<p><strong>Brain-to-model alignment.</strong> Using the published
+THINGS-MEG decoding RDMs (200 test categories, 4 subjects), SPOSE human
+similarity judgements correlated with brain RDMs at a peak of r = 0.058
+(at 400 ms; Figure 4), with 146/281 timepoints exceeding the shuffle
+null at p &lt; 0.05 (uncorrected). CLIP text embeddings peaked at r =
+0.060 (at 30 ms), with 74/281 significant timepoints. Both models fall
+substantially below the inter-subject noise ceiling (upper: r = 0.545 at
+120 ms, lower: r = 0.138), with SPOSE at ~12% of the noise ceiling at
+its peak. No effect survived conservative correction for multiple
+comparisons.</p>
+<hr />
+<h2 id="discussion">Discussion</h2>
+<p>We find modest but directionally consistent signals: object-category
+information is decodable from MEG, brain RDMs correlate weakly with
+human-rated similarity, and cross-subject alignment is feasible. The
+primary hypothesis—that alignment complexity increases with
+post-stimulus latency—was not supported.</p>
+<p>Two methodological constraints limit the current results. First,
+trial count is critically low: with 12 trials/category, crossnobis RDMs
+are heavily noise-regularised, and single-timepoint condition means
+carry substantial estimation error—the alignment complexity analysis
+uses only 100-category means, which may be too noisy to resolve subtle
+alignment geometry differences. Second, n = 4 subjects provides minimal
+power for between-subject statistics. Both constraints are intrinsic to
+the THINGS-MEG acquisition design rather than fixable in
+post-processing.</p>
+<p><strong>Recommended next steps.</strong> (1) Download THINGS stimulus
+images and extract CLIP/DINOv2 <em>image</em> embeddings; text
+embeddings are a weak proxy for visual representations. (2) Replicate
+alignment complexity analysis with the higher-SNR full-1854-category
+RDMs before drawing conclusions about the hierarchy hypothesis. (3)
+Extend to additional THINGS-MEG subjects if/when data become
+available.</p>
+<p>The codebase is fully reproducible: preprocessing, decoding, RSA,
+alignment, and statistical controls are implemented as modular Python
+scripts (MNE-Python, rsatoolbox, scikit-learn, himalaya) with a single
+configuration file. All negative results are reported without
+smoothing.</p>
+<hr />
+<h2 id="references">References</h2>
+<ul>
+<li>Gifford AT, Cichy RM, et al. (2022). THINGS-MEG: a large-scale,
+multi-subject dataset of MEG recordings during passive viewing.
+<em>OpenNeuro ds004212</em>.</li>
+<li>Kriegeskorte N, Mur M, Bandettini P (2008). Representational
+similarity analysis. <em>Frontiers in Systems Neuroscience</em>.</li>
+<li>Maris E, Oostenveld R (2007). Nonparametric statistical testing of
+EEG- and MEG-data. <em>Journal of Neuroscience Methods</em>.</li>
+<li>Muttenthaler L, et al. (2023). Human alignment of neural network
+representations. <em>ICLR</em>.</li>
+<li>Nili H, et al. (2014). A toolbox for representational similarity
+analysis. <em>PLoS Computational Biology</em>.</li>
+<li>Walther A, et al. (2016). Reliability of dissimilarity measures for
+multi-voxel pattern analysis. <em>NeuroImage</em>.</li>
+<li>Williams AH, et al. (2021). Generalized shape metrics on neural
+representations. <em>NeurIPS</em>.</li>
+</ul>
+</body>
+</html>
