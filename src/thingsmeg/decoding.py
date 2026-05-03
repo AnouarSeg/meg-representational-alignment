@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import numpy as np
 from mne.decoding import GeneralizingEstimator, SlidingEstimator
-from sklearn.linear_model import RidgeClassifier
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.model_selection import StratifiedKFold
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
@@ -18,7 +18,11 @@ from .config import Config
 
 
 def _make_clf() -> object:
-    return make_pipeline(StandardScaler(), RidgeClassifier(alpha=1.0))
+    # LDA with shrinkage (Ledoit-Wolf) — optimal for high-dim MEG, few trials
+    return make_pipeline(
+        StandardScaler(),
+        LinearDiscriminantAnalysis(solver="eigen", shrinkage="auto"),
+    )
 
 
 def time_resolved_decode(
