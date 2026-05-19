@@ -20,9 +20,9 @@ from scipy.linalg import orthogonal_procrustes
 
 DERIV   = Path("/Volumes/MEG/things-eeg1/derivatives/preprocessed")
 RESULTS = Path("results/eeg1")
-N_PAIRS_SAMPLE = 50   # random subset for tractability
+N_PAIRS_SAMPLE = 10   # small sample — TGM is O(T^2) expensive
 N_FOLDS = 5
-N_CAT   = 1854
+N_CAT   = 200   # subsample categories for speed (still meaningful geometry)
 MODAL_CH = 63
 
 
@@ -76,10 +76,17 @@ if __name__ == "__main__":
 
     fold_size = N_CAT // N_FOLDS
     folds = [np.arange(k*fold_size, (k+1)*fold_size) for k in range(N_FOLDS)]
+    print(f"Using {N_CAT} categories, {N_PAIRS_SAMPLE} pairs, {n_times if n_times else '?'} timepoints")
+
+    cat_idx = rng.choice(1854, N_CAT, replace=False)
+    cat_idx.sort()
 
     for pi, (sA, sB) in enumerate(pairs):
-        A = np.load(DERIV/sA/f"{sA}_condition_means.npy")
-        B = np.load(DERIV/sB/f"{sB}_condition_means.npy")
+        A_full = np.load(DERIV/sA/f"{sA}_condition_means.npy")
+        B_full = np.load(DERIV/sB/f"{sB}_condition_means.npy")
+        A = A_full[cat_idx]
+        B = B_full[cat_idx]
+        del A_full, B_full
         if n_times is None:
             n_times = A.shape[1]
             times = np.linspace(-50, 495, n_times)
