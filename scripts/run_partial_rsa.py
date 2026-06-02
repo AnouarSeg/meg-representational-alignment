@@ -124,7 +124,9 @@ if __name__ == "__main__":
 
     ax = axes[1]
     for n, color in colors.items():
-        std = full[std_keys[n]]
+        std = np.array(full[std_keys[n]])
+        if std.ndim > 1:
+            std = std.mean(0)
         part = partial_results[n]
         ax.plot(times, std, color=color, lw=1.5, ls="--", alpha=0.6, label=f"{n} standard")
         ax.plot(times, part, color=color, lw=2, label=f"{n} partial")

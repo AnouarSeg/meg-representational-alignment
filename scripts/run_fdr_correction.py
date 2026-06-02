@@ -1,15 +1,15 @@
-"""Apply FDR correction (Benjamini-Hochberg) to all RSA time courses.
+"""FDR correction for brain-model RSA time courses (vectorized).
 
-Computes p-values via permutation (shuffle model RDM labels 1000×),
-then applies BH-FDR across timepoints for each model.
+Uses pre-ranked brain/model vectors + matrix multiply for permutation null.
+All 1000 permutations × 180 timepoints computed in seconds via numpy.
 
-Output: results/rsa_fdr.npz — adds fdr_sig_{model} boolean arrays
-        figures/figure4_rsa_fdr.png — replot with FDR significance bars
+Output: results/rsa_fdr.npz
+        figures/figure4_rsa_fdr.png
 """
 from __future__ import annotations
 from pathlib import Path
 import numpy as np
-from scipy.stats import spearmanr, rankdata
+from scipy.stats import rankdata
 
 RESULTS = Path("results")
 DERIV   = Path("data/derivatives")
@@ -17,31 +17,31 @@ N_PERM  = 1000
 RNG     = np.random.default_rng(42)
 
 
-def upper_tri(m):
-    idx = np.triu_indices(m.shape[0], k=1)
-    return m[idx]
-
-
-def spearman_fast(x: np.ndarray, y: np.ndarray) -> float:
-    """Vectorized Spearman r — faster than scipy for repeated calls."""
-    rx = rankdata(x); ry = rankdata(y)
-    rx -= rx.mean(); ry -= ry.mean()
-    return float(np.dot(rx, ry) / (np.linalg.norm(rx) * np.linalg.norm(ry)))
+def rank_norm_matrix(M: np.ndarray) -> np.ndarray:
+    """Rank-normalize each row of M (n_times, n_pairs) → same shape."""
+    out = np.zeros_like(M, dtype=np.float32)
+    for i in range(M.shape[0]):
+        r = rankdata(M[i]).astype(np.float32)
+        r -= r.mean(); r /= (r.std() + 1e-12)
+        out[i] = r
+    return out
 
 
 def bh_fdr(pvals: np.ndarray, alpha: float = 0.05) -> np.ndarray:
-    """Benjamini-Hochberg FDR correction. Returns boolean significance mask."""
     n = len(pvals)
     order = np.argsort(pvals)
     threshold = (np.arange(1, n+1) / n) * alpha
     sig = np.zeros(n, dtype=bool)
     last = -1
-    for i, idx in enumerate(order):
-        if pvals[idx] <= threshold[i]:
+    for i in range(n):
+        if pvals[order[i]] <= threshold[i]:
             last = i
     if last >= 0:
         sig[order[:last+1]] = True
     return sig
+
+
+def upper_tri(m): return m[np.triu_indices(m.shape[0], k=1)]
 
 
 def load_brain_rdms():
@@ -58,102 +58,88 @@ def load_brain_rdms():
 
 
 if __name__ == "__main__":
-    print("Loading brain RDMs...")
+    print("Loading brain RDMs and computing mean per timepoint...")
     brain_rdms, times = load_brain_rdms()
     n_times = len(times)
     n_cat   = brain_rdms[0].shape[1]
+    n_pairs = n_cat * (n_cat - 1) // 2
 
-    # Load pre-computed RSA time courses (skip re-running slow Spearman)
-    # and use them directly with permutation-derived p-values
-    full = np.load(str(RESULTS / "brain_model_rsa_full1854.npz"))
-    precomputed = {
-        "SPOSE":     full["SPOSE"],
-        "CLIP-B/32": full["CLIP_image"],
-        "DINOv2":    full["DINOv2"],
-        "ResNet-50": full["ResNet50"],
-        "CLIP-L/14": full["CLIP_L14"],
-    }
-    rsa_times = full["times_ms"]
-    n_times   = len(rsa_times)
-    times     = rsa_times
+    # Mean brain RDM upper-triangle across subjects: (n_times, n_pairs)
+    brain_mat = np.zeros((n_times, n_pairs), dtype=np.float32)
+    for r in brain_rdms:
+        for t in range(n_times):
+            brain_mat[t] += upper_tri(r[t]) / len(brain_rdms)
 
+    # Pre-rank brain matrix rows: (n_times, n_pairs)
+    print("Rank-normalizing brain matrix...")
+    brain_ranked = rank_norm_matrix(brain_mat)  # (n_times, n_pairs)
+    del brain_mat
+
+    # Load model vectors and pre-rank
     model_files = {
-        "CLIP-B/32":  DERIV / "clip_image_rdm.npz",
-        "DINOv2":     DERIV / "dinov2_rdm.npz",
-        "ResNet-50":  DERIV / "resnet50_rdm.npz",
-        "CLIP-L/14":  DERIV / "clip_large_rdm.npz",
+        "CLIP-B/32": DERIV / "clip_image_rdm.npz",
+        "DINOv2":    DERIV / "dinov2_rdm.npz",
+        "ResNet-50": DERIV / "resnet50_rdm.npz",
+        "CLIP-L/14": DERIV / "clip_large_rdm.npz",
     }
-
-    # Load model vectors (for permutation null)
-    model_vecs = {}
+    model_ranked = {}
     for name, fpath in model_files.items():
-        if not fpath.exists():
-            print(f"  Skipping {name}")
-            continue
-        d = np.load(str(fpath))
-        model_vecs[name] = upper_tri(d["rdm"][:n_cat, :n_cat].astype(np.float32))
+        if not fpath.exists(): continue
+        vec = upper_tri(np.load(str(fpath))["rdm"][:n_cat,:n_cat].astype(np.float32))
+        r = rankdata(vec).astype(np.float32)
+        r -= r.mean(); r /= (r.std() + 1e-12)
+        model_ranked[name] = r
         print(f"  Loaded {name}")
 
-    # SPOSE: load from derivatives if available, else skip permutation for it
-    spose_path = DERIV / "spose_rdm.npz"
-    if spose_path.exists():
-        model_vecs["SPOSE"] = upper_tri(np.load(str(spose_path))["rdm"][:n_cat,:n_cat].astype(np.float32))
-    else:
-        # No full SPOSE RDM on disk — use analytical normal approx for p-values
-        model_vecs["SPOSE"] = None
+    # Pre-computed mean RSA from saved results (for observed values)
+    full = np.load(str(RESULTS / "brain_model_rsa_full1854.npz"))
+    obs_lookup = {
+        "CLIP-B/32": np.array(full["CLIP_image"]).mean(0),
+        "DINOv2":    np.array(full["DINOv2"]).mean(0),
+        "ResNet-50": np.array(full["ResNet50"]).mean(0),
+        "CLIP-L/14": np.array(full["CLIP_L14"]).mean(0),
+    }
 
-    # Mean brain vector per timepoint
-    print("Computing mean brain RDM per timepoint...")
-    brain_mean_vecs = np.zeros((n_times, len(upper_tri(brain_rdms[0][0]))))
-    for t in range(n_times):
-        brain_mean_vecs[t] = np.mean([upper_tri(r[t]) for r in brain_rdms], axis=0)
+    # SPOSE: analytical p-value only (no full RDM on disk)
+    spose_obs = np.array(full["SPOSE"]).mean(0)
+    n_eff = n_pairs
+    from scipy.stats import norm as scipy_norm
+    z = np.arctanh(np.clip(spose_obs, -0.999, 0.999))
+    spose_pvals = np.clip(1 - scipy_norm.cdf(z * np.sqrt(n_eff - 3)), 1e-6, 1.0)
+    spose_sig_fdr = bh_fdr(spose_pvals)
+    print(f"  SPOSE (analytical): FDR sig {spose_sig_fdr.sum()} timepoints, "
+          f"peak r={spose_obs.max():.4f} at {times[spose_obs.argmax()]:.0f}ms")
 
-    print(f"Computing {N_PERM} permutation null per model...")
-    save_dict = {"times": times}
+    print(f"Running {N_PERM} permutations (vectorized)...")
+    save_dict = {"times": times,
+                 "rsa_SPOSE": spose_obs, "pvals_SPOSE": spose_pvals,
+                 "sig_fdr_SPOSE": spose_sig_fdr,
+                 "sig_bonf_SPOSE": spose_pvals < 0.05/n_times}
 
-    for name in precomputed:
-        print(f"  {name}...")
-        obs       = precomputed[name]
-        model_vec = model_vecs.get(name)
+    for name, model_r in model_ranked.items():
+        print(f"  {name}...", end=" ", flush=True)
+        obs = obs_lookup[name]  # (n_times,) observed Spearman r
 
-        if model_vec is None:
-            # Analytical p-value: Fisher z-transform, n_eff = n_pairs
-            n_eff = n_cat * (n_cat - 1) // 2
-            from scipy.stats import norm as scipy_norm
-            z = np.arctanh(np.clip(obs, -0.999, 0.999))
-            pvals = 1 - scipy_norm.cdf(z * np.sqrt(n_eff - 3))
-        else:
-            null = np.zeros((N_PERM, n_times))
-            perm_len = len(model_vec)
-            for p in range(N_PERM):
-                perm_vec = model_vec[RNG.permutation(perm_len)]
-                null[p]  = [spearman_fast(brain_mean_vecs[t], perm_vec) for t in range(n_times)]
-            pvals = np.maximum(np.mean(null >= obs[None, :], axis=0), 1/N_PERM)
-
-        # Permutation null: shuffle model vec indices
-        null = np.zeros((N_PERM, n_times))
+        # Vectorized permutation: brain_ranked @ perm(model_r) for N_PERM perms
+        # brain_ranked: (n_times, n_pairs), model_r: (n_pairs,)
+        # For each perm, shuffle model_r indices and dot with all timepoints at once
+        null_max = np.zeros(N_PERM)
+        null_dist = np.zeros((N_PERM, n_times), dtype=np.float32)
         for p in range(N_PERM):
-            perm_vec = model_vec[RNG.permutation(len(model_vec))]
-            null[p] = [spearman_fast(brain_mean_vecs[t], perm_vec) for t in range(n_times)]
+            perm_r = model_r[RNG.permutation(n_pairs)]
+            # Spearman r = dot(ranked_brain[t], perm_r) / n_pairs (already normalized)
+            null_dist[p] = brain_ranked @ perm_r / n_pairs
 
-        # P-values: fraction of permutations >= observed at each timepoint
-        pvals = np.mean(null >= obs[None, :], axis=0)
-        pvals = np.maximum(pvals, 1 / N_PERM)  # min p = 1/N_PERM
-
-        sig_fdr  = bh_fdr(pvals, alpha=0.05)
+        pvals = np.maximum(np.mean(null_dist >= obs[None, :], axis=0), 1/N_PERM)
+        sig_fdr  = bh_fdr(pvals)
         sig_bonf = pvals < (0.05 / n_times)
 
-        n_sig_fdr  = sig_fdr.sum()
-        n_sig_bonf = sig_bonf.sum()
-        peak_ms    = times[np.argmax(obs)]
-        print(f"    peak r={obs.max():.4f} at {peak_ms:.0f}ms  |  "
-              f"FDR sig: {n_sig_fdr} timepoints  |  Bonf sig: {n_sig_bonf}")
-
-        key = name.replace("/", "_").replace("-", "_").replace(" ", "_")
+        key = name.replace("/","_").replace("-","_").replace(" ","_")
         save_dict[f"rsa_{key}"]      = obs
         save_dict[f"pvals_{key}"]    = pvals
         save_dict[f"sig_fdr_{key}"]  = sig_fdr
         save_dict[f"sig_bonf_{key}"] = sig_bonf
+        print(f"FDR sig: {sig_fdr.sum()} pts | Bonf: {sig_bonf.sum()} pts | peak r={obs.max():.4f}")
 
     np.savez(str(RESULTS / "rsa_fdr.npz"), **save_dict)
     print("Saved results/rsa_fdr.npz")
@@ -161,35 +147,28 @@ if __name__ == "__main__":
     # Plot
     import matplotlib; matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-
-    colors = {
-        "SPOSE":     "#2ca02c",
-        "CLIP-B/32": "#1f77b4",
-        "DINOv2":    "#ff7f0e",
-        "ResNet-50": "#9467bd",
-        "CLIP-L/14": "#8c564b",
-    }
+    colors = {"SPOSE":"#2ca02c","CLIP-B/32":"#1f77b4","DINOv2":"#ff7f0e",
+              "ResNet-50":"#9467bd","CLIP-L/14":"#8c564b"}
+    all_models = list(colors.keys())
 
     fig, ax = plt.subplots(figsize=(10, 4))
-    y_bar = -0.003
-    bar_height = 0.0005
-
-    for ni, name in enumerate(model_vecs.keys()):
-        key = name.replace("/", "_").replace("-", "_").replace(" ", "_")
-        obs     = save_dict[f"rsa_{key}"]
-        sig_fdr = save_dict[f"sig_fdr_{key}"]
-        color   = colors.get(name, "gray")
-        ax.plot(times, obs, color=color, lw=2, label=name)
-        if sig_fdr.any():
-            ax.fill_between(times, y_bar - ni*bar_height*1.5,
-                            y_bar - ni*bar_height*1.5 + bar_height,
-                            where=sig_fdr, color=color, alpha=0.8)
+    y0 = -0.006
+    for ni, name in enumerate(all_models):
+        key = name.replace("/","_").replace("-","_").replace(" ","_")
+        obs_k  = f"rsa_{key}"
+        sig_k  = f"sig_fdr_{key}"
+        if obs_k not in save_dict: continue
+        obs = save_dict[obs_k]
+        sig = save_dict[sig_k]
+        ax.plot(times, obs, color=colors[name], lw=2, label=name)
+        if sig.any():
+            ax.fill_between(times, y0 - ni*0.0008, y0 - ni*0.0008 + 0.0006,
+                            where=sig, color=colors[name], alpha=0.85)
 
     ax.axhline(0, color="gray", ls=":", lw=1)
     ax.axvline(0, color="k", ls=":", lw=0.8)
-    ax.set_xlabel("Time (ms)")
-    ax.set_ylabel("Spearman r (brain–model RSA)")
-    ax.set_title("Brain-model RSA with FDR correction (colored bars = p<0.05 FDR)")
+    ax.set_xlabel("Time (ms)"); ax.set_ylabel("Spearman r")
+    ax.set_title("Brain-model RSA with BH-FDR significance (colored bars below)")
     ax.legend(fontsize=9)
     fig.tight_layout()
     out = Path("figures/figure4_rsa_fdr.png")
