@@ -20,17 +20,23 @@ This project tests whether early visual representations align across individuals
 | Alignment noise ceiling (EEG) | Within-subject peak **0.411%** → cross-subject at **81.5% of ceiling** |
 | Alignment complexity (ridge − Procrustes) — MEG | −0.001 ± 0.011 — null |
 | Alignment complexity — EEG | **−0.013%** (95% CI: −0.020 to −0.006%); cluster permutation **p < 0.001** |
-| SPOSE brain-model RSA (1852 categories) | r = 0.046 at 380 ms — **17.3% of noise ceiling** |
-| CLIP ViT-B/32 brain-model RSA | r = 0.043 at 325 ms — 16.1% of NC |
-| CLIP ViT-L/14 brain-model RSA | r = 0.030 at 340 ms — 11.2% of NC |
+| PCA before alignment (k=5–63) | Complexity null at **all k** — not a dimensionality artifact |
+| Alignment temporal generalization (EEG) | Off-diagonal ≈ diagonal (2.48% vs 2.41%) — **time-invariant geometry** |
+| Alignment noise ceiling (EEG) | Cross-subject at **81.5% of within-subject ceiling** |
+| Individual differences (EEG, n=48) | Reliability → alignment r=0.719; alignment → RSA r=0.298 |
+| SPOSE brain-model RSA (1852 categories) | r = 0.046 at 380 ms — **17.3% of noise ceiling** — FDR sig 149/180 timepoints |
+| CLIP ViT-B/32 brain-model RSA | r = 0.043 at 325 ms — 16.1% of NC — FDR sig 150/180 |
+| CLIP ViT-L/14 brain-model RSA | r = 0.030 at 340 ms — 11.2% of NC — **highest unique partial beta (0.051)** |
 | ResNet-50 brain-model RSA | r = 0.029 at 410 ms — 10.9% of NC |
-| DINOv2 ViT-B/14 brain-model RSA | r = 0.013 at 380 ms — 4.8% of NC (weakest) |
+| DINOv2 ViT-B/14 brain-model RSA | r = 0.013 at 380 ms — 4.8% of NC — anti-correlates with animate objects |
+| Random ViT-B/32 (untrained) baseline | r = 0.009 — **4.2× below trained CLIP** — training not architecture drives alignment |
+| Category decomposition | CLIP advantage uniform across categories; DINOv2 wins only on texture-heavy objects |
 | V1 fMRI→MEG peak | **125 ms** |
 | FFA fMRI→MEG peak | **450 ms** — V1→FFA gap ~325 ms confirms cortical hierarchy |
 
-**Primary finding:** The early-simple/late-complex alignment hypothesis is **definitively rejected** across both MEG (n=4) and EEG (n=48, p < 0.001). Cross-subject EEG alignment reaches 81.5% of the within-subject noise ceiling, ruling out insufficient signal as an explanation. Ridge alignment is significantly *worse* than Procrustes throughout — consistent with EEG representations being low-dimensional (63 channels) where over-parameterised maps underfit.
+**Primary finding:** The early-simple/late-complex alignment hypothesis is **definitively rejected** across both MEG (n=4) and EEG (n=48, p < 0.001). Cross-subject EEG alignment reaches 81.5% of the within-subject noise ceiling, ruling out insufficient signal. Complexity is null at all PCA dimensionalities (k=5–63) and alignment geometry is time-invariant — a map trained at 20 ms transfers equally to 400 ms.
 
-**Secondary finding:** A supervision gradient is confirmed in brain-model RSA: models trained on categorical objectives (SPOSE, CLIP-B/32) align more strongly with late MEG activity than self-supervised texture models (DINOv2). Notably CLIP-L/14 underperforms CLIP-B/32, suggesting alignment benefit saturates before model scale.
+**Secondary finding:** A supervision gradient is confirmed in brain-model RSA (all 5 models FDR-significant, ~130–158 timepoints). Untrained ViT-B/32 aligns 4.2× weaker than trained CLIP, confirming learned representations drive the effect. Partial RSA reveals CLIP-L/14 has the highest unique contribution despite lower standard r — its signal is non-redundant with other models. DINOv2 anti-correlates with brain responses to animate objects.
 
 ---
 
@@ -52,10 +58,35 @@ This project tests whether early visual representations align across individuals
 ### Figure 3d: Complexity null — cluster permutation test
 ![Permutation](figures/figure3d_alignment_complexity_permutation.png)
 
+### Figure 3e: Alignment temporal generalization (EEG)
+![Alignment TGM](figures/figure3e_alignment_tgm.png)
+
+*Off-diagonal ≈ diagonal: a map trained at any timepoint transfers equally to all others. Time-invariant geometry explains the complexity null mechanistically.*
+
+### Figure 3f: PCA dimensionality robustness
+![PCA Alignment](figures/figure3f_alignment_pca.png)
+
+*Complexity null holds at all k ∈ {5, 10, 20, 30, 50, 63} PCA dimensions. Low dimensionality is not the explanation.*
+
 ### Figure 4: Brain-to-model RSA (5 models, 1852 categories)
 ![Brain-model RSA](figures/figure4_brain_model_rsa_full1854.png)
 
-*Supervision gradient: SPOSE ≈ CLIP-B/32 > CLIP-L/14 ≈ ResNet-50 >> DINOv2. All models peak late (325–410 ms), consistent with categorical rather than low-level representations.*
+*Supervision gradient: SPOSE ≈ CLIP-B/32 > CLIP-L/14 ≈ ResNet-50 >> DINOv2. All models peak late (325–410 ms), FDR-significant across ~130–158 timepoints.*
+
+### Figure 4b: Category decomposition
+![Category decomp](figures/figure4b_category_decomposition.png)
+
+*CLIP advantage is uniform across animacy. DINOv2 anti-correlates with animate objects; wins only on texture-heavy categories (paper bags, swimwear, garlic).*
+
+### Figure 4c: Random-weights baseline
+![Random baseline](figures/figure4c_rsa_with_random.png)
+
+*Untrained ViT-B/32 peaks at r=0.009 vs trained CLIP r=0.038 — 4.2× gap confirms training drives brain alignment, not architecture.*
+
+### Figure 4d: Partial RSA (unique model contributions)
+![Partial RSA](figures/figure4d_partial_rsa.png)
+
+*CLIP-L/14 has highest unique beta (0.051) despite lower standard r — its representational structure is non-redundant with other models.*
 
 ### Figure 5: Cortical hierarchy validation
 ![Hierarchy](figures/figure5_hierarchy_validation.png)
@@ -99,10 +130,20 @@ python scripts/run_hierarchy_validation.py
 python scripts/download_things_eeg1.py --all             # ~55 GB
 bash scripts/batch_preprocess_and_align.sh               # preprocess + alignment
 
-# Controls
+# Controls and additional analyses
 python scripts/run_alignment_noise_ceiling.py
 python scripts/run_alignment_complexity_permutation.py
+python scripts/run_alignment_pca.py               # PCA dimensionality robustness
+python scripts/run_alignment_temporal_generalization.py  # TGM of alignment
+python scripts/run_individual_differences.py
 python scripts/run_brain_model_rsa_eeg1.py
+
+# Brain-model controls
+python scripts/build_random_clip_embeddings.py    # untrained ViT-B/32 baseline
+python scripts/run_brain_model_rsa_random_baseline.py
+python scripts/run_partial_rsa.py                 # unique model contributions
+python scripts/run_fdr_correction.py              # BH-FDR across timepoints
+python scripts/run_category_decomposition.py      # animate/inanimate split
 ```
 
 Or open `notebooks/01_analysis_walkthrough.ipynb` for an end-to-end walkthrough.
