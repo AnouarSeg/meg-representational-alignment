@@ -30,13 +30,15 @@ This project tests whether early visual representations align across individuals
 | ResNet-50 brain-model RSA | r = 0.029 at 410 ms — 10.9% of NC |
 | DINOv2 ViT-B/14 brain-model RSA | r = 0.013 at 380 ms — 4.8% of NC — anti-correlates with animate objects |
 | Random ViT-B/32 (untrained) baseline | r = 0.009 — **4.2× below trained CLIP** — training not architecture drives alignment |
+| CLIP-text (concept names only) | r = 0.028 at 410 ms — 10.5% NC — weaker than CLIP-image, visual features matter |
+| ViT-B/16 supervised (ImageNet) | r = 0.008 at 390 ms — 3.0% NC — **≈ random baseline**, architecture alone insufficient |
 | Category decomposition | CLIP advantage uniform across categories; DINOv2 wins only on texture-heavy objects |
 | V1 fMRI→MEG peak | **125 ms** |
 | FFA fMRI→MEG peak | **450 ms** — V1→FFA gap ~325 ms confirms cortical hierarchy |
 
 **Primary finding:** The early-simple/late-complex alignment hypothesis is **definitively rejected** across both MEG (n=4) and EEG (n=48, p < 0.001). Cross-subject EEG alignment reaches 81.5% of the within-subject noise ceiling, ruling out insufficient signal. Complexity is null at all PCA dimensionalities (k=5–63) and alignment geometry is time-invariant — a map trained at 20 ms transfers equally to 400 ms.
 
-**Secondary finding:** A supervision gradient is confirmed in brain-model RSA (all 5 models FDR-significant, ~130–158 timepoints). Untrained ViT-B/32 aligns 4.2× weaker than trained CLIP, confirming learned representations drive the effect. Partial RSA reveals CLIP-L/14 has the highest unique contribution despite lower standard r — its signal is non-redundant with other models. DINOv2 anti-correlates with brain responses to animate objects.
+**Secondary finding:** A supervision gradient is confirmed in brain-model RSA (all 5 models FDR-significant, ~130–158 timepoints). A controlled model comparison reveals a clear hierarchy: ViT-B/16 supervised ≈ random ViT-B/32 (r≈0.008–0.009) < CLIP-text (r=0.028) < CLIP-image (r=0.043). Architecture alone (transformer) contributes nothing — ImageNet classification training in the ViT regime fails to produce MEG-alignable representations, in contrast to ResNet-50 (r=0.029). Language grounding (CLIP-text) adds moderate signal, and visual+language joint training (CLIP-image) is required for full alignment. Partial RSA reveals CLIP-L/14 has the highest unique contribution despite lower standard r. DINOv2 anti-correlates with brain responses to animate objects.
 
 ---
 
