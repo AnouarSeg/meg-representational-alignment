@@ -33,6 +33,8 @@ This project tests whether early visual representations align across individuals
 | CLIP-text (concept names only) | r = 0.028 at 410 ms — 10.5% NC — weaker than CLIP-image, visual features matter |
 | ViT-B/16 supervised (ImageNet) | r = 0.008 at 390 ms — 3.0% NC — **≈ random baseline**, architecture alone insufficient |
 | Category decomposition | CLIP advantage uniform across categories; DINOv2 wins only on texture-heavy objects |
+| ResNet-50 layer-wise RSA | Layer3 peaks highest (r=0.165 at 415ms); layer1 peaks earliest (200ms) — partial temporal hierarchy |
+| CLIP layer-wise RSA | Block9 (of 11) peaks highest (r=0.185 at 410ms); final block (r=0.102) — intermediate > task layer |
 | V1 fMRI→MEG peak | **125 ms** |
 | FFA fMRI→MEG peak | **450 ms** — V1→FFA gap ~325 ms confirms cortical hierarchy |
 
@@ -90,6 +92,13 @@ This project tests whether early visual representations align across individuals
 
 *CLIP-L/14 has highest unique beta (0.051) despite lower standard r — its representational structure is non-redundant with other models.*
 
+### Figure 7: Layer-wise brain-model RSA
+![ResNet layers](figures/figure7a_layerwise_resnet.png)
+![CLIP blocks](figures/figure7b_layerwise_clip.png)
+![Layer depth vs brain](figures/figure7c_layer_depth_vs_brain.png)
+
+*Intermediate layers align better with brain than final task-optimised layers. ResNet layer3 (r=0.165) > layer4 (r=0.117); CLIP block9 (r=0.185) > block11/final (r=0.102). ResNet layer1 peaks earliest (200ms), deep layers peak at ~415ms — partial temporal hierarchy.*
+
 ### Figure 5: Cortical hierarchy validation
 ![Hierarchy](figures/figure5_hierarchy_validation.png)
 
@@ -146,6 +155,10 @@ python scripts/run_brain_model_rsa_random_baseline.py
 python scripts/run_partial_rsa.py                 # unique model contributions
 python scripts/run_fdr_correction.py              # BH-FDR across timepoints
 python scripts/run_category_decomposition.py      # animate/inanimate split
+
+# Layer-wise brain-model alignment
+python scripts/build_layerwise_embeddings.py      # ResNet layers 1-4, CLIP blocks 0/3/6/9/11
+python scripts/run_layerwise_rsa.py               # RSA per layer × timepoint, heatmap figures
 ```
 
 Or open `notebooks/01_analysis_walkthrough.ipynb` for an end-to-end walkthrough.
