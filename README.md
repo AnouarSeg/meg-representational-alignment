@@ -35,6 +35,8 @@ This project tests whether early visual representations align across individuals
 | Category decomposition | CLIP advantage uniform across categories; DINOv2 wins only on texture-heavy objects |
 | ResNet-50 layer-wise RSA | Layer3 peaks highest (r=0.165 at 415ms); layer1 peaks earliest (200ms) — partial temporal hierarchy |
 | CLIP layer-wise RSA | Block9 (of 11) peaks highest (r=0.185 at 410ms); final block (r=0.102) — intermediate > task layer |
+| Source-space RSA (CLIP, 68 Desikan parcels) | Temporal pole r=0.218@495ms; lateral occipital r=0.194@580ms; parahippocampal r=0.179@260ms |
+| Behavioral norms vs per-category RSA | All proxy norms non-significant (p>0.13); bat1(animal) r=+0.11 vs bat2(implement) r=−0.20 |
 | V1 fMRI→MEG peak | **125 ms** |
 | FFA fMRI→MEG peak | **450 ms** — V1→FFA gap ~325 ms confirms cortical hierarchy |
 
@@ -91,6 +93,12 @@ This project tests whether early visual representations align across individuals
 ![Partial RSA](figures/figure4d_partial_rsa.png)
 
 *CLIP-L/14 has highest unique beta (0.051) despite lower standard r — its representational structure is non-redundant with other models.*
+
+### Figure 9: Source-space RSA (where × when)
+![Source RSA CLIP](figures/figure9a_source_rsa_CLIP_B_32.png)
+![Source top parcels](figures/figure9b_source_top_parcels.png)
+
+*Temporal pole and entorhinal cortex peak at ~495ms; lateral occipital at ~580ms; parahippocampal at ~260ms — consistent with ventral stream hierarchy.*
 
 ### Figure 7: Layer-wise brain-model RSA
 ![ResNet layers](figures/figure7a_layerwise_resnet.png)
