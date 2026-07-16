@@ -54,34 +54,21 @@ def download_subject(sub_id: int, raw_dir: Path) -> bool:
 
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # Try openneuro-py first
-    try:
-        result = subprocess.run([
-            "openneuro", "download",
-            "--dataset", DATASET_ID,
-            "--include", f"{sub_str}/eeg/",
-            "--include", f"{sub_str}/eeg/*.bdf",
-            "--include", f"{sub_str}/eeg/*.json",
-            "--include", f"{sub_str}/eeg/*.tsv",
-            str(raw_dir)
-        ], capture_output=True, text=True, timeout=600)
-        if result.returncode == 0:
-            return True
-        print(f"  openneuro-py failed: {result.stderr[:200]}")
-    except (FileNotFoundError, subprocess.TimeoutExpired):
-        pass
-
-    # Fall back to aws s3 (no credentials needed for OpenNeuro)
-    s3_path = f"s3://openneuro.org/{DATASET_ID}/{sub_str}/eeg/"
     result = subprocess.run([
-        "aws", "s3", "sync", s3_path, str(out_dir / "eeg"),
-        "--no-sign-request", "--region", "us-east-1"
-    ], capture_output=True, text=True, timeout=600)
+        "python3", "-m", "openneuro", "download",
+        "--dataset", DATASET_ID,
+        "--include", f"{sub_str}/eeg",
+        "--target-dir", str(raw_dir),
+        "--max-concurrent-downloads", "3",
+    ], capture_output=True, text=True, timeout=1800)
 
-    if result.returncode != 0:
-        print(f"  aws s3 failed: {result.stderr[:200]}")
-        return False
-    return True
+    if result.returncode == 0:
+        return True
+
+    print(f"  openneuro-py failed (exit {result.returncode})")
+    if result.stderr:
+        print(f"  stderr: {result.stderr[:300]}")
+    return False
 
 
 def preprocess_subject(sub_id: int, raw_dir: Path, deriv_dir: Path) -> bool:
