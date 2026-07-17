@@ -28,7 +28,7 @@ sys.path.insert(0, "src")
 RESULTS   = Path("results")
 SRC_DIR   = Path("results/source")
 SUBJECTS  = ["BIGMEG1", "BIGMEG2", "BIGMEG3", "BIGMEG4"]
-MNE_DATA  = Path("/Users/anouarseghir/mne_data/MNE-fsaverage-data")
+MNE_DATA  = Path.home() / "mne_data" / "MNE-fsaverage-data"
 FS_DIR    = str(MNE_DATA)       # subjects_dir
 FS_SUB    = "fsaverage"
 LAMBDA2   = 1.0 / 9.0           # SNR=3 → lambda2=1/9 (standard for evoked)

@@ -25,7 +25,7 @@ RESULTS  = Path("results")
 SRC_DIR  = Path("results/source")
 DERIV    = Path("data/derivatives")
 FIGS     = Path("figures")
-FS_DIR   = "/Users/anouarseghir/mne_data/MNE-fsaverage-data"
+FS_DIR   = str(Path.home() / "mne_data" / "MNE-fsaverage-data")
 FS_SUB   = "fsaverage"
 
 MODELS   = ["CLIP-B/32", "CLIP-L/14", "ResNet-50", "DINOv2"]
