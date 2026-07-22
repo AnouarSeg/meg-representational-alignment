@@ -1,5 +1,10 @@
 # Temporal dynamics of cross-subject representational alignment in human MEG
 
+[![Paper](https://img.shields.io/badge/Paper-OSF%20Preprint-blue)](https://doi.org/10.17605/OSF.IO/JZFSA)
+[![Code](https://img.shields.io/badge/Code-GitHub-black)](https://github.com/AnouarSeg/meg-representational-alignment)
+[![Data](https://img.shields.io/badge/Data-OpenNeuro-green)](https://openneuro.org/datasets/ds004212)
+[![DOI](https://img.shields.io/badge/DOI-10.17605%2FOSF.IO%2FJZFSA-orange)](https://doi.org/10.17605/OSF.IO/JZFSA)
+
 **Does alignment complexity between subjects increase over post-stimulus time, mirroring the cortical hierarchy?**
 
 This project tests whether early visual representations align across individuals via simple (near-orthogonal) transforms, while later semantic representations require more flexible mappings — and whether this gradient mirrors the supervision hierarchy of CLIP, ResNet-50, and DINOv2.
