@@ -1,6 +1,6 @@
 # Temporal dynamics of cross-subject representational alignment in human MEG
 
-[![Paper](https://img.shields.io/badge/Paper-OSF%20Preprint-blue)](https://doi.org/10.17605/OSF.IO/JZFSA)
+[![Paper](https://img.shields.io/badge/Paper-OSF%20Preprint-blue)](https://osf.io/jzfsa/files/7bzwa)
 [![Code](https://img.shields.io/badge/Code-GitHub-black)](https://github.com/AnouarSeg/meg-representational-alignment)
 [![Data](https://img.shields.io/badge/Data-OpenNeuro-green)](https://openneuro.org/datasets/ds004212)
 [![DOI](https://img.shields.io/badge/DOI-10.17605%2FOSF.IO%2FJZFSA-orange)](https://doi.org/10.17605/OSF.IO/JZFSA)
