@@ -51,71 +51,29 @@ This project tests whether early visual representations align across individuals
 
 ---
 
-## Figure gallery
+## Selected figures
 
-### Figure 1: Object-category decoding (LDA)
-![Decoding](figures/figure1_decoding.png)
-
-### Figure 2 & 3: Cross-subject alignment and complexity (MEG)
-![Alignment](figures/figure2_alignment.png)
-![Complexity](figures/figure3_complexity.png)
-
-### Figure 3b: Alignment complexity replication (EEG, n=48)
-![EEG Alignment](figures/figure3b_alignment_complexity_eeg1.png)
-
-### Figure 3c: Alignment noise ceiling
-![Noise Ceiling](figures/figure3c_alignment_noise_ceiling.png)
-
-### Figure 3d: Complexity null — cluster permutation test
-![Permutation](figures/figure3d_alignment_complexity_permutation.png)
-
-### Figure 3e: Alignment temporal generalization (EEG)
+### Alignment temporal generalization (EEG, n=48)
 ![Alignment TGM](figures/figure3e_alignment_tgm.png)
 
-*Off-diagonal ≈ diagonal: a map trained at any timepoint transfers equally to all others. Time-invariant geometry explains the complexity null mechanistically.*
+*Off-diagonal ≈ diagonal: a map trained at any timepoint transfers equally to all others — time-invariant representational geometry explains the complexity null mechanistically.*
 
-### Figure 3f: PCA dimensionality robustness
-![PCA Alignment](figures/figure3f_alignment_pca.png)
+### Complexity null — cluster permutation test
+![Permutation](figures/figure3d_alignment_complexity_permutation.png)
 
-*Complexity null holds at all k ∈ {5, 10, 20, 30, 50, 63} PCA dimensions. Low dimensionality is not the explanation.*
+*Ridge − Procrustes accuracy is flat across all 180 timepoints (cluster permutation p < 0.001 for the null, 1,000 permutations, EEG n=48).*
 
-### Figure 4: Brain-to-model RSA (5 models, 1852 categories)
+### Brain-to-model RSA (5 models, 1852 categories)
 ![Brain-model RSA](figures/figure4_brain_model_rsa_full1854.png)
 
-*Supervision gradient: SPOSE ≈ CLIP-B/32 > CLIP-L/14 ≈ ResNet-50 >> DINOv2. All models peak late (325–410 ms), FDR-significant across ~130–158 timepoints.*
+*Supervision gradient: SPOSE ≈ CLIP-B/32 > CLIP-L/14 ≈ ResNet-50 >> DINOv2. All models FDR-significant across ~130–158 timepoints, peaking 325–410 ms.*
 
-### Figure 4b: Category decomposition
-![Category decomp](figures/figure4b_category_decomposition.png)
-
-*CLIP advantage is uniform across animacy. DINOv2 anti-correlates with animate objects; wins only on texture-heavy categories (paper bags, swimwear, garlic).*
-
-### Figure 4c: Random-weights baseline
-![Random baseline](figures/figure4c_rsa_with_random.png)
-
-*Untrained ViT-B/32 peaks at r=0.009 vs trained CLIP r=0.038 — 4.2× gap confirms training drives brain alignment, not architecture.*
-
-### Figure 4d: Partial RSA (unique model contributions)
-![Partial RSA](figures/figure4d_partial_rsa.png)
-
-*CLIP-L/14 has highest unique beta (0.051) despite lower standard r — its representational structure is non-redundant with other models.*
-
-### Figure 9: Source-space RSA (where × when)
-![Source RSA CLIP](figures/figure9a_source_rsa_CLIP_B_32.png)
-![Source top parcels](figures/figure9b_source_top_parcels.png)
-
-*Temporal pole and entorhinal cortex peak at ~495ms; lateral occipital at ~580ms; parahippocampal at ~260ms — consistent with ventral stream hierarchy.*
-
-### Figure 7: Layer-wise brain-model RSA
-![ResNet layers](figures/figure7a_layerwise_resnet.png)
+### CLIP layer-wise RSA
 ![CLIP blocks](figures/figure7b_layerwise_clip.png)
-![Layer depth vs brain](figures/figure7c_layer_depth_vs_brain.png)
 
-*Intermediate layers align better with brain than final task-optimised layers. ResNet layer3 (r=0.165) > layer4 (r=0.117); CLIP block9 (r=0.185) > block11/final (r=0.102). ResNet layer1 peaks earliest (200ms), deep layers peak at ~415ms — partial temporal hierarchy.*
+*Intermediate block 9 (r=0.185) outperforms the final task-optimised block 11 (r=0.102). Early blocks peak first (~200 ms); deep blocks peak at ~410 ms — a partial temporal hierarchy within the model.*
 
-### Figure 5: Cortical hierarchy validation
-![Hierarchy](figures/figure5_hierarchy_validation.png)
-
-*Official THINGS-MEG validation time courses. V1 (green) peaks at 125 ms; FFA (red) peaks at 450 ms — a 325 ms gap confirming the ventral stream hierarchy.*
+Full figure gallery and analysis walkthrough in the [paper](https://osf.io/jzfsa/files/7bzwa) and `notebooks/01_analysis_walkthrough.ipynb`.
 
 ---
 
